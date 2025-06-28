@@ -1,3 +1,7 @@
+'''
+main.py je file kojeg pokreće web service za deploy web stranice na usprojekat.onrender.com
+'''
+
 from flask import Flask, request, jsonify
 
 app = Flask(__name__)
