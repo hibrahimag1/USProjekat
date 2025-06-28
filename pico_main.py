@@ -1,3 +1,6 @@
+'''
+pico_main.py je file koji se nalazi na pico kontroleru i pokreće se pri napajanju. Zadužen za čitanje senzorskih podataka i objavljivanja na server.
+'''
 import network
 import urequests
 from machine import Pin, ADC, Timer
@@ -16,11 +19,10 @@ while not wlan.isconnected():
     pass
 print("Connected:", wlan.ifconfig())
 
-# Light sensor setup
 light_sensor = ADC(Pin(26))
 soil_sensor = ADC(Pin(27))
 
-# Server endpoint (adjust this to your server URL)
+# Server endpoint 
 POST_URL = "https://usprojekat.onrender.com/api/data"
 
 def get_light():
@@ -32,19 +34,17 @@ def get_soil_humidity():
 def get_and_post_values(timer=None):
     light = get_light()
     humidity = get_soil_humidity()
-    print(f"Light: {light:.1f}%  Humidity: {humidity:.1f}%")
+    print(f"Light: {light:.1f}%  Humidity: {humidity:.1f}%", end=" ")
     
     try:
         response = urequests.post(POST_URL, json={"light": light, "humidity": humidity})
         print("Posted:", response.status_code)
         response.close()
-        pass
     except Exception as e:
         print("POST error:", e)
 
 timer = Timer()
 timer.init(period=10000, mode=Timer.PERIODIC, callback=get_and_post_values)
 
-# Main loop
 while True:
     sleep(0.1)
