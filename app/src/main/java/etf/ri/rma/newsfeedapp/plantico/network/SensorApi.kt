@@ -6,7 +6,7 @@ import retrofit2.http.GET
 data class LightResponse(val light: Float)
 
 data class SensorDataResponse(
-    val humidity: Float,
+    val humidity:   Float,
     val light: Float
 )
 

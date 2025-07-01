@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import etf.ri.rma.newsfeedapp.plantico.notification.NotificationHelper
+import etf.ri.rma.newsfeedapp.plantico.screen.LoadingScreen
+import etf.ri.rma.newsfeedapp.plantico.screen.PlantStatusScreen
 import etf.ri.rma.newsfeedapp.plantico.ui.theme.PlanticoTheme
 import etf.ri.rma.newsfeedapp.plantico.viewModel.SensorViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        NotificationHelper.createNotificationChannel(this)
         setContent {
             PlanticoTheme {
                 SensorScreen()
@@ -24,10 +29,18 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+/*
 @Composable
 fun SensorScreen(vm: SensorViewModel = viewModel()) {
     val light by vm.light.collectAsState()
     val humidity by vm.humidity.collectAsState()
+
+
+
+    val context = LocalContext.current
+    LaunchedEffect(light, humidity) {
+        vm.checkAndNotify(context)
+    }
 
     Column(
         modifier = Modifier
@@ -35,27 +48,7 @@ fun SensorScreen(vm: SensorViewModel = viewModel()) {
             .padding(16.dp),
         verticalArrangement = Arrangement.Center
     ) {
-     /*   // Svjetlo
-        Text(text = "Nivo svjetla", style = MaterialTheme.typography.titleLarge)
-        Spacer(modifier = Modifier.height(8.dp))
-        if (light != null) {
-            val lightProgress = (light!! / 2000f).coerceIn(0f, 1f)
-            Text(text = String.format("%.1f lx", light))
-            LinearProgressIndicator(
-                progress = lightProgress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
-        } else {
-            Text("Učitavanje svjetla…")
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-            )
-        }
-*/
+
         light?.let { lx ->
             val progress = (lx / 100f).coerceIn(0f, 1f)
             Text(text = String.format("%.1f lx", lx))
@@ -114,4 +107,47 @@ fun SensorScreenPreview() {
     PlanticoTheme {
         SensorScreen()
     }
+}*/
+
+/*
+@Composable
+fun SensorScreen(vm: SensorViewModel = viewModel()) {
+    val light by vm.light.collectAsState()
+    val humidity by vm.humidity.collectAsState()
+
+
+
+    val context = LocalContext.current
+    LaunchedEffect(light, humidity) {
+        vm.checkAndNotify(context)
+    }
+    PlantStatusScreen(
+        waterLevel = 100.00.toFloat(),
+        lightLevel = 60.toFloat()
+    )
+}*/
+@Composable
+fun SensorScreen(vm: SensorViewModel = viewModel()) {
+    val light by vm.light.collectAsState()
+    val humidity by vm.humidity.collectAsState()
+    val context = LocalContext.current
+
+    // Pozivamo notifikacije samo kada su obje vrijednosti != null
+    LaunchedEffect(light, humidity) {
+        if (light != null && humidity != null) {
+            vm.checkAndNotify(context)
+        }
+    }
+
+    if (light != null && humidity != null) {
+        // Prikaz statusa biljke sa realnim vrijednostima
+        PlantStatusScreen(
+            waterLevel = humidity,
+            lightLevel = light
+        )
+    } else {
+        // Prikaz "Učitavanje" dok podaci ne stignu
+        LoadingScreen()
+    }
 }
+
